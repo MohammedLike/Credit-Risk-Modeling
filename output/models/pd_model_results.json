@@ -1,0 +1,18 @@
+{
+  "Logistic Regression": {
+    "mean_auc": 0.9193,
+    "std_auc": 0.0032
+  },
+  "Random Forest": {
+    "mean_auc": 0.8947,
+    "std_auc": 0.0034
+  },
+  "Gradient Boosting": {
+    "mean_auc": 0.9128,
+    "std_auc": 0.0035
+  },
+  "XGBoost": {
+    "mean_auc": 0.9116,
+    "std_auc": 0.0042
+  }
+}

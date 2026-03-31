@@ -1,0 +1,54 @@
+{
+  "eda_summary": {
+    "total_loans": 50000,
+    "default_count": 4000,
+    "default_rate": 0.08,
+    "avg_loan_amount": 18225.8379,
+    "avg_fico": 689.2736,
+    "avg_dti": 0.212,
+    "avg_interest_rate": 14.3167,
+    "avg_income": 58879.7281
+  },
+  "validation": {
+    "auc_train": 0.9208,
+    "auc_test": 0.9162,
+    "ks_train": 0.6917,
+    "ks_test": 0.6718,
+    "gini_train": 0.8415,
+    "gini_test": 0.8325,
+    "brier_score": 0.1216,
+    "log_loss": 0.3775,
+    "psi": 0.0008
+  },
+  "capital": {
+    "total_ead": 227599173.57,
+    "total_rwa": 303511748.97,
+    "rwa_density": 1.3335,
+    "total_el": 25568491.63,
+    "el_ratio": 0.11234,
+    "total_capital": 24280939.92,
+    "capital_ratio": 0.1067
+  },
+  "stress_testing": {
+    "baseline": {
+      "avg_pd": 0.2691,
+      "el_ratio": 0.107638,
+      "portfolio_el": 24498235.17
+    },
+    "mild_recession": {
+      "avg_pd": 0.3775,
+      "el_ratio": 0.160058,
+      "portfolio_el": 36429064.22
+    },
+    "severe_recession": {
+      "avg_pd": 0.5464,
+      "el_ratio": 0.251365,
+      "portfolio_el": 57210368.75
+    },
+    "deep_depression": {
+      "avg_pd": 0.7691,
+      "el_ratio": 0.399938,
+      "portfolio_el": 91025521.11
+    }
+  }
+}
