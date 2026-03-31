@@ -1,22 +1,3 @@
-"""
-Credit Risk Modeling — End-to-End Pipeline
-==========================================
-Runs the complete credit risk modeling workflow:
-  1. Data Generation
-  2. Exploratory Data Analysis
-  3. Feature Engineering
-  4. PD Model Training & Selection
-  5. LGD Modeling
-  6. EAD Modeling
-  7. Credit Scorecard Development
-  8. Model Validation
-  9. Stress Testing
- 10. Basel III Capital Calculation
- 11. Thesis PDF Generation
-
-Usage:
-    python main.py
-"""
 import sys
 import os
 import time
