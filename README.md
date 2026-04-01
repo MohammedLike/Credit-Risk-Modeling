@@ -1,4 +1,4 @@
-# Credit Risk Modeling: End-to-End Quantitative Framework
+# Credit Risk Modeling
 
 A production-grade credit risk modeling pipeline implementing **Probability of Default (PD)**, **Loss Given Default (LGD)**, **Exposure at Default (EAD)**, credit scorecard development, macroeconomic stress testing, and **Basel III regulatory capital** calculations.
 
