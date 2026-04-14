@@ -14,5 +14,9 @@
   "XGBoost": {
     "mean_auc": 0.9116,
     "std_auc": 0.0042
+  },
+  "CatBoost": {
+    "mean_auc": 0.915,
+    "std_auc": 0.0035
   }
 }

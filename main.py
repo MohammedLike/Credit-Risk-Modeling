@@ -1,4 +1,3 @@
-
 import sys
 import os
 import time
@@ -28,12 +27,25 @@ from src.scorecard import CreditScorecard
 from src.validation import full_validation, plot_decile_analysis
 from src.stress_testing import StressTester
 from src.capital import BaselCapitalCalculator
+from src.explainability import ModelExplainability
+from src.decision_engine import LoanDecisionEngine
 
 
-def main():
+def main(use_optuna=False, enable_shap=True):
+    """
+    Run the complete credit risk modeling pipeline.
+    
+    Args:
+        use_optuna: If True, use Optuna for hyperparameter optimization (slower)
+        enable_shap: If True, generate SHAP explanations
+    """
     start_time = time.time()
     print("=" * 70)
     print("  CREDIT RISK MODELING — END-TO-END PIPELINE")
+    if use_optuna:
+        print("  [Optuna Hyperparameter Optimization Enabled]")
+    if enable_shap:
+        print("  [SHAP Model Explainability Enabled]")
     print("=" * 70)
 
     # =========================================================================
@@ -70,11 +82,12 @@ def main():
     # STEP 4: PD Model Training
     # =========================================================================
     print("\n[4/10] Training PD Models...")
-    pd_suite = PDModelSuite()
+    pd_suite = PDModelSuite(use_optuna=use_optuna)
     cv_results = pd_suite.train_all(X_train, y_train)
     pd_suite.plot_model_comparison()
     pd_suite.plot_feature_importance(feature_names)
     pd_suite.save_results()
+    pd_suite.save_models()  # Save for Flask app
 
     # Predictions
     y_train_pred = pd_suite.predict_pd(X_train)
@@ -96,6 +109,25 @@ def main():
     print(f"  Gini (Test): {validation_results['gini_test']:.4f}")
     print(f"  Brier Score: {validation_results['brier_score']:.4f}")
     print(f"  PSI:         {validation_results['psi']:.4f}")
+
+    # =========================================================================
+    # STEP 5B: SHAP Model Explainability (Optional)
+    # =========================================================================
+    if enable_shap:
+        print("\n[5B/10] Generating SHAP Explanations...")
+        try:
+            best_model = pd_suite.get_best_model()
+            explainer = ModelExplainability(best_model, X_train, feature_names)
+            explainer.generate_explanation_report(
+                X_test, 
+                y_test=y_test, 
+                predictions=y_test_pred,
+                save_dir=FIGURES_DIR
+            )
+            feature_importance_df = explainer.get_feature_importance_df()
+            print(f"  ✓ SHAP explanations generated ({len(feature_importance_df)} features)")
+        except Exception as e:
+            print(f"  Warning: SHAP generation failed: {e}")
 
     # =========================================================================
     # STEP 6: Credit Scorecard
@@ -172,6 +204,54 @@ def main():
     capital_calc.plot_capital_analysis(pd_portfolio, lgd_portfolio, ead_portfolio)
 
     # =========================================================================
+    # STEP 10B: Loan Decision Engine (Optional)
+    # =========================================================================
+    print("\n[10B/10] Running Decision Engine...")
+    try:
+        decision_engine = LoanDecisionEngine(
+            approval_el_threshold=0.05,
+            base_rate=0.08,
+            pricing_scalar=10.0
+        )
+        
+        # Calculate decisions for test set
+        decision_results = decision_engine.make_decisions(
+            pd_portfolio,
+            lgd_portfolio,
+            ead_portfolio,
+            df_test["loan_amount"].values
+        )
+        
+        # Calculate risk-based pricing
+        pricing_results = decision_engine.calculate_risk_based_pricing(
+            pd_portfolio,
+            lgd_portfolio,
+            ead_portfolio,
+            df_test["loan_amount"].values
+        )
+        
+        # Plot decision dashboard
+        decision_engine.plot_decision_dashboard(
+            save_path=os.path.join(FIGURES_DIR, "20_decision_engine.png")
+        )
+        
+        # Generate report
+        report = decision_engine.generate_decision_report(
+            decision_results,
+            pricing_results,
+            save_dir=OUTPUT_DIR
+        )
+        print(report)
+        
+        portfolio_metrics = decision_engine.get_portfolio_metrics()
+        print(f"  ✓ Decision engine complete")
+        print(f"    - Approval Rate: {portfolio_metrics['approval_rate']:.1%}")
+        print(f"    - Avg Portfolio EL: {portfolio_metrics['avg_el']:.2%}")
+        
+    except Exception as e:
+        print(f"  Warning: Decision engine failed: {e}")
+
+    # =========================================================================
     # Save all results
     # =========================================================================
     all_results = {
@@ -231,4 +311,25 @@ def main():
 
 
 if __name__ == "__main__":
-    results = main()
+    import argparse
+    
+    parser = argparse.ArgumentParser(
+        description="Credit Risk Modeling Pipeline",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python main.py                    # Run standard pipeline
+  python main.py --optuna           # Use Optuna tuning (slower)
+  python main.py --shap             # Enable SHAP explanations
+  python main.py --optuna --shap    # Both optimizations
+  python app.py                     # Start Flask web app
+        """
+    )
+    parser.add_argument('--optuna', action='store_true', 
+                        help='Use Optuna for hyperparameter optimization')
+    parser.add_argument('--no-shap', action='store_false', dest='enable_shap',
+                        help='Disable SHAP explanations (enabled by default)')
+    parser.set_defaults(enable_shap=True)
+    
+    args = parser.parse_args()
+    results = main(use_optuna=args.optuna, enable_shap=args.enable_shap)
