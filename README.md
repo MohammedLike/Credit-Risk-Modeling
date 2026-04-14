@@ -189,7 +189,7 @@ Offset = BaseScore - Factor * ln(TargetOdds)
 
 | File | Description |
 |------|-------------|
-| `output/figures/01_default_distribution.png` | Target variable analysis |
+| output/figures/01_default_distribution.png | Target variable analysis |
 | `output/figures/02_feature_distributions.png` | Feature distributions by default |
 | `output/figures/03_correlation_matrix.png` | Feature correlation heatmap |
 | `output/figures/04_fico_analysis.png` | FICO score deep-dive |
